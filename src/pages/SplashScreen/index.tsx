@@ -1,27 +1,46 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {ImageBackground, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import Logo from '../../assets/logo.svg';
+import Logo from '../../assets/food.svg'; // Logo SVG kamu
+import backgroundImage from '../../assets/background.png'; // Ganti dengan path gambar background kamu
 
 const SplashScreen = () => {
   return (
-    <View style={styles.container}>
-      <Logo width={120} height={120} />
-      <Text>Money Tracker</Text>
-    </View>
+    <ImageBackground source={backgroundImage} style={styles.background}>
+      <View style={styles.container}>
+        <Text style={styles.titleJM}>JM</Text>
+        <Text style={styles.titleFood}>food</Text>
+        <Logo style={styles.logo} />
+      </View>
+    </ImageBackground>
   );
 };
 
 export default SplashScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#02CF8E',
+  background: {
     flex: 1,
+    resizeMode: 'cover',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  text: {
-    fontSize: 32,
-    fontFamily: 'Poppins-Medium',
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  titleJM: {
+    fontSize: 48,
+    fontFamily: 'Satisfy-Regular', // Sesuaikan dengan font yang kamu install
+    color: '#000',
+  },
+  titleFood: {
+    fontSize: 24,
+    fontFamily: 'Satisfy-Regular',
+    color: '#000',
+    marginBottom: 20,
+  },
+  logo: {
+    width: 120,
+    height: 120,
   },
 });
