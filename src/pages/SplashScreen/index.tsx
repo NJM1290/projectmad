@@ -1,46 +1,33 @@
-import {ImageBackground, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
-import Logo from '../../assets/food.svg'; // Logo SVG kamu
-import backgroundImage from '../../assets/background.png'; // Ganti dengan path gambar background kamu
+import React, {useEffect} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
+import Logo from '../../assets/Logo.svg';
 
-const SplashScreen = () => {
+const SplashScreen = ({navigation}) => {
+  useEffect(() => {
+    setTimeout(() => {
+      navigation.replace('SignIn');
+    }, 3000);
+  }, []);
   return (
-    <ImageBackground source={backgroundImage} style={styles.background}>
-      <View style={styles.container}>
-        <Text style={styles.titleJM}>JM</Text>
-        <Text style={styles.titleFood}>food</Text>
-        <Logo style={styles.logo} />
-      </View>
-    </ImageBackground>
+    <View style={styles.container}>
+      <Logo width={150} height={150} />
+    </View>
   );
 };
 
 export default SplashScreen;
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   container: {
-    alignItems: 'center',
+    flex: 1,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  titleJM: {
-    fontSize: 48,
-    fontFamily: 'Satisfy-Regular', // Sesuaikan dengan font yang kamu install
-    color: '#000',
-  },
-  titleFood: {
+  text: {
     fontSize: 24,
-    fontFamily: 'Satisfy-Regular',
-    color: '#000',
-    marginBottom: 20,
-  },
-  logo: {
-    width: 120,
-    height: 120,
+    fontWeight: 'bold',
+    color: '#1E1E2D',
+    marginTop: 20,
   },
 });

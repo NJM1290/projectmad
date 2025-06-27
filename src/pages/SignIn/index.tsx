@@ -1,108 +1,77 @@
-import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ImageBackground,
-  TouchableOpacity,
-} from 'react-native';
+import React, {useState, useContext} from 'react';
+import {StyleSheet, View, Alert} from 'react-native';
 import {Header, TextInput} from '../../components/molecules';
 import {Button, Gap} from '../../components/atoms';
+import {AuthContext} from '../../../App'; // ✅ Import context
 
-import BackgroundImage from '../../assets/background.png';
-import GoogleIcon from '../../assets/google.png'; // logo google bulat
+const SignIn = ({navigation}) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-const SignIn = () => {
+  const {user} = useContext(AuthContext); // ✅ Ambil user dari context
+
+  const handleSignIn = () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Gagal', 'Masukkan email dan password Anda!');
+      return;
+    }
+
+    if (!user) {
+      Alert.alert('Gagal', 'Belum ada akun terdaftar!');
+      return;
+    }
+
+    if (email === user.email && password === user.password) {
+      Alert.alert('Berhasil', 'Anda berhasil masuk!');
+      navigation.replace('Home'); // ✅ replace agar tidak bisa kembali
+    } else {
+      Alert.alert('Gagal', 'Email atau password salah!');
+    }
+  };
+
   return (
-    <ImageBackground source={BackgroundImage} style={styles.background}>
-      <View style={styles.overlay}>
-        {/* LogoImage sudah dihapus */}
-
-        <View style={styles.container}>
-          <Header text="< Sign In" />
-          <Gap height={20} />
-          <TextInput text="Username" placeholder="Enter your username" />
-          <Gap height={16} />
-          <TextInput
-            text="Password"
-            placeholder="Enter your password"
-            secureTextEntry
-          />
-          <Gap height={24} />
-          <Button text="SignIn" />
-          <Gap height={12} />
-
-          <View style={styles.linkContainer}>
-            <TouchableOpacity>
-              <Text style={styles.linkText}>Forget Password?</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text style={styles.linkText}>Sign Up</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.separator}>
-            <View style={styles.line} />
-            <Text style={styles.continueText}>Continue With</Text>
-            <View style={styles.line} />
-          </View>
-
-          <ImageBackground source={GoogleIcon} style={styles.googleIcon} />
-        </View>
+    <View style={styles.pageContainer}>
+      <Header text="Sign In" />
+      <View style={styles.contentContainer}>
+        <Gap height={26} />
+        <TextInput
+          text="Email Address"
+          placeholder="Enter your email address"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <Gap height={16} />
+        <TextInput
+          text="Password"
+          placeholder="Enter your password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <Gap height={24} />
+        <Button text="Sign In" onPress={handleSignIn} />
+        <Gap height={12} />
+        <Button
+          text="Create New Account"
+          color="#8D92A3"
+          buttonColor="#FFFFFF"
+          onPress={() => navigation.navigate('SignUp')}
+        />
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 
 export default SignIn;
 
 const styles = StyleSheet.create({
-  background: {
+  pageContainer: {
     flex: 1,
-    resizeMode: 'cover',
+    backgroundColor: '#fff',
   },
-  overlay: {
+  contentContainer: {
     flex: 1,
-    alignItems: 'center',
-    paddingTop: 60,
-  },
-  container: {
-    width: '85%',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  linkContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  linkText: {
-    fontSize: 12,
-    color: '#8D92A3',
-  },
-  separator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#D9D9D9',
-  },
-  continueText: {
-    marginHorizontal: 10,
-    fontSize: 12,
-    color: '#8D92A3',
-  },
-  googleIcon: {
-    width: 40,
-    height: 40,
-    alignSelf: 'center',
+    marginTop: 24,
+    marginHorizontal: 24,
   },
 });

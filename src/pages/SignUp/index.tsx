@@ -1,108 +1,168 @@
-import React from 'react';
+import React, {useState, useContext} from 'react';
 import {
+  Image,
+  ScrollView,
   StyleSheet,
-  Text,
-  View,
-  ImageBackground,
   TouchableOpacity,
+  View,
 } from 'react-native';
-import {Header, TextInput} from '../../components/molecules';
+import {NullPhoto} from '../../assets';
 import {Button, Gap} from '../../components/atoms';
+import {Header, TextInput} from '../../components/molecules';
+import {launchCamera} from 'react-native-image-picker';
+import {showMessage} from 'react-native-flash-message';
+import {AuthContext} from '../../../App'; // ✅ Tambahkan ini
 
-import BackgroundImage from '../../assets/background.png';
-import GoogleIcon from '../../assets/google.png'; // logo google bulat
+const SignUp = ({navigation}) => {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [based64, setbased64] = useState('');
+  const [photo, setPhoto] = useState(NullPhoto);
 
-const SignUp = () => {
+  const {setUser} = useContext(AuthContext); // ✅ Akses context
+
+  const registerNewUser = () => {
+    const emailRegex = /\S+@\S+\.\S+/;
+
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
+      showMessage({
+        message: 'Gagal',
+        description: 'Semua field wajib diisi!',
+        type: 'danger',
+      });
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      showMessage({
+        message: 'Gagal',
+        description: 'Format email tidak valid!',
+        type: 'danger',
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      showMessage({
+        message: 'Gagal',
+        description: 'Password minimal 6 karakter!',
+        type: 'danger',
+      });
+      return;
+    }
+
+    // ✅ Simpan ke context
+    setUser({
+      fullName,
+      email,
+      password,
+      photo: based64,
+    });
+
+    showMessage({
+      message: 'Pendaftaran berhasil!',
+      type: 'success',
+    });
+
+    navigation.navigate('SignIn');
+  };
+
+  const getImage = async () => {
+    const result = await launchCamera({
+      maxHeight: 100,
+      maxWidth: 100,
+      quality: 0.5,
+      includeBase64: true,
+      mediaType: 'photo',
+    });
+
+    if (result.didCancel) {
+      showMessage({
+        message: 'Ambil foto dibatalkan',
+        type: 'danger',
+      });
+      setPhoto(NullPhoto);
+    } else {
+      const data = result.assets[0];
+      const photoBased64 = `data:${data.type};base64,${data.base64}`; // ✅ Fixed syntax
+      setbased64(photoBased64);
+      setPhoto({uri: photoBased64});
+    }
+  };
+
   return (
-    <ImageBackground source={BackgroundImage} style={styles.background}>
-      <View style={styles.overlay}>
-        {/* LogoImage sudah dihapus */}
-
-        <View style={styles.container}>
-          <Header text="< Sign Up" />
-          <Gap height={20} />
-          <TextInput text="Username" placeholder="Enter your username" />
-          <Gap height={16} />
-          <TextInput
-            text="Password"
-            placeholder="Enter your password"
-            secureTextEntry
-          />
-          <Gap height={24} />
-          <Button text="SignUp" />
-          <Gap height={12} />
-
-          <View style={styles.linkContainer}>
-            <TouchableOpacity>
-              <Text style={styles.linkText}>Forget Password?</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text style={styles.linkText}>Sign Up</Text>
+    <ScrollView style={styles.pageContainer}>
+      <Header
+        text="Sign Up"
+        backButton={true}
+        onPress={() => navigation.goBack()}
+      />
+      <View style={styles.contentContainer}>
+        <View style={styles.profileContainer}>
+          <View style={styles.profileBorder}>
+            <TouchableOpacity activeOpacity={0.5} onPress={getImage}>
+              <Image source={photo} style={styles.avatar} />
             </TouchableOpacity>
           </View>
-
-          <View style={styles.separator}>
-            <View style={styles.line} />
-            <Text style={styles.continueText}>Or SignUp With</Text>
-            <View style={styles.line} />
-          </View>
-
-          <ImageBackground source={GoogleIcon} style={styles.googleIcon} />
         </View>
+        <Gap height={26} />
+        <TextInput
+          text="Full Name"
+          placeholder="Enter your full name"
+          value={fullName}
+          onChangeText={setFullName}
+        />
+        <Gap height={26} />
+        <TextInput
+          text="Email Address"
+          placeholder="Enter your email address"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <Gap height={16} />
+        <TextInput
+          text="Password"
+          placeholder="Enter your password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <Gap height={24} />
+        <Button text="Continue" onPress={registerNewUser} />
+        <Gap height={12} />
       </View>
-    </ImageBackground>
+    </ScrollView>
   );
 };
 
 export default SignUp;
 
 const styles = StyleSheet.create({
-  background: {
+  pageContainer: {
     flex: 1,
-    resizeMode: 'cover',
   },
-  overlay: {
+  contentContainer: {
     flex: 1,
+    marginTop: 24,
+    marginHorizontal: 24,
+  },
+  profileContainer: {
     alignItems: 'center',
-    paddingTop: 60,
   },
-  container: {
-    width: '85%',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  linkContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  linkText: {
-    fontSize: 12,
-    color: '#8D92A3',
-  },
-  separator: {
-    flexDirection: 'row',
+  profileBorder: {
+    height: 110,
+    width: 110,
+    borderColor: '#8D92A3',
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderRadius: 110 / 2,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 20,
   },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#D9D9D9',
-  },
-  continueText: {
-    marginHorizontal: 10,
-    fontSize: 12,
-    color: '#8D92A3',
-  },
-  googleIcon: {
-    width: 40,
-    height: 40,
-    alignSelf: 'center',
+  avatar: {
+    height: 90,
+    width: 90,
+    borderRadius: 90 / 2,
   },
 });
