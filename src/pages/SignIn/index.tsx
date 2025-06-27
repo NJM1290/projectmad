@@ -49,7 +49,12 @@ const SignIn = ({navigation}) => {
           onChangeText={setPassword}
         />
         <Gap height={24} />
-        <Button text="Sign In" onPress={handleSignIn} />
+        <Button
+          text="Sign In"
+          onPress={handleSignIn}
+          color="#4682B4"
+          buttonColor="#FFFFFF" // putih
+        />
         <Gap height={12} />
         <Button
           text="Create New Account"

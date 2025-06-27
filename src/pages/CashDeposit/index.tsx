@@ -24,13 +24,13 @@ const CashDeposit = ({navigation}) => {
 
   const handleDeposit = () => {
     if (!rekening || !bank || !jumlah) {
-      Alert.alert('Gagal', 'Semua field harus diisi!');
+      Alert.alert('Failed', 'All fields must be filled!');
       return;
     }
 
     const nominalAngka = parseInt(jumlah.replace(/[^0-9]/g, ''), 10);
     if (isNaN(nominalAngka) || nominalAngka <= 0) {
-      Alert.alert('Gagal', 'Jumlah tidak valid!');
+      Alert.alert('Failed', 'Invalid amount!');
       return;
     }
 
@@ -43,7 +43,7 @@ const CashDeposit = ({navigation}) => {
 
     const transaksiBaru = {
       tanggal,
-      deskripsi: 'Setor Tunai',
+      deskripsi: 'Cash Deposit',
       nominal: nominalAngka,
     };
 
@@ -52,7 +52,7 @@ const CashDeposit = ({navigation}) => {
     setRekening('');
     setBank('');
     setJumlah('');
-    Alert.alert('Berhasil', 'Setor tunai Anda berhasil');
+    Alert.alert('Success', 'Cash deposit successful');
   };
 
   return (
@@ -67,7 +67,7 @@ const CashDeposit = ({navigation}) => {
 
       {/* Saldo */}
       <View style={styles.card}>
-        <Text style={styles.label}>Saldo Saat Ini</Text>
+        <Text style={styles.label}>Funds</Text>
         <Text style={styles.bold}>NM</Text>
         <Text>200213443U3I</Text>
         <Text style={styles.bold}>Rp{saldo.toLocaleString('id-ID')}</Text>
@@ -117,7 +117,7 @@ const CashDeposit = ({navigation}) => {
 
       {/* Riwayat Transaksi */}
       <View style={styles.historyContainer}>
-        <Text style={styles.label}>Terakhir 3 Transaksi</Text>
+        <Text style={styles.label}>Last Transactions</Text>
         {transaksi.slice(0, 3).map((item, index) => (
           <View key={index} style={styles.historyItem}>
             <View>

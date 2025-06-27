@@ -129,7 +129,12 @@ const SignUp = ({navigation}) => {
           onChangeText={setPassword}
         />
         <Gap height={24} />
-        <Button text="Continue" onPress={registerNewUser} />
+        <Button
+          text="Continue"
+          onPress={registerNewUser}
+          color="#4682B4"
+          buttonColor="#FFFFFF"
+        />
         <Gap height={12} />
       </View>
     </ScrollView>

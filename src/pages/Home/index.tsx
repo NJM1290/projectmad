@@ -59,11 +59,15 @@ const Home = ({navigation, route}) => {
         <Button
           text="Cash Deposit"
           onPress={() => navigation.navigate('CashDeposit')}
+          color="#4682B4"
+          buttonColor="#FFFFFF"
         />
         <Gap height={10} />
         <Button
           text="Cash Withdrawal"
           onPress={() => navigation.navigate('CashWithdrawal')}
+          color="#4682B4"
+          buttonColor="#FFFFFF"
         />
       </View>
     </View>
