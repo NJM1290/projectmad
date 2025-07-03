@@ -11,7 +11,12 @@ import {Button, Gap} from '../../components/atoms';
 import {Header, TextInput} from '../../components/molecules';
 import {launchCamera} from 'react-native-image-picker';
 import {showMessage} from 'react-native-flash-message';
-import {AuthContext} from '../../../App'; // ✅ Tambahkan ini
+import {getAuth, createUserWithEmailAndPassword} from 'firebase/auth';
+import {getDatabase, ref, set} from 'firebase/database';
+import {AuthContext} from '../../../App';
+
+// ✅ Tambahkan regex email
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const SignUp = ({navigation}) => {
   const [fullName, setFullName] = useState('');
@@ -20,11 +25,10 @@ const SignUp = ({navigation}) => {
   const [based64, setbased64] = useState('');
   const [photo, setPhoto] = useState(NullPhoto);
 
-  const {setUser} = useContext(AuthContext); // ✅ Akses context
+  const {setUser} = useContext(AuthContext);
 
   const registerNewUser = () => {
-    const emailRegex = /\S+@\S+\.\S+/;
-
+    // ✅ Validasi input sebelum membuat akun
     if (!fullName.trim() || !email.trim() || !password.trim()) {
       showMessage({
         message: 'Gagal',
@@ -52,20 +56,43 @@ const SignUp = ({navigation}) => {
       return;
     }
 
-    // ✅ Simpan ke context
-    setUser({
-      fullName,
-      email,
-      password,
-      photo: based64,
-    });
+    console.log({fullName, email, password, based64});
+    const auth = getAuth();
+    const db = getDatabase();
 
-    showMessage({
-      message: 'Pendaftaran berhasil!',
-      type: 'success',
-    });
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(userCredential => {
+        const user = userCredential.user;
 
-    navigation.navigate('SignIn');
+        // Simpan data ke Firebase Realtime Database
+        set(ref(db, 'users/' + user.uid), {
+          fullName: fullName,
+          email: email,
+          password: password,
+          photo: based64,
+        });
+
+        setUser({
+          fullName,
+          email,
+          password,
+          photo: based64,
+        });
+
+        showMessage({
+          message: 'Pendaftaran berhasil!',
+          type: 'success',
+        });
+
+        navigation.navigate('SignIn');
+      })
+      .catch(error => {
+        showMessage({
+          message: 'Gagal',
+          description: error.message,
+          type: 'danger',
+        });
+      });
   };
 
   const getImage = async () => {
@@ -85,7 +112,7 @@ const SignUp = ({navigation}) => {
       setPhoto(NullPhoto);
     } else {
       const data = result.assets[0];
-      const photoBased64 = `data:${data.type};base64,${data.base64}`; // ✅ Fixed syntax
+      const photoBased64 = `data:${data.type};base64,${data.base64}`;
       setbased64(photoBased64);
       setPhoto({uri: photoBased64});
     }

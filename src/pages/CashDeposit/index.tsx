@@ -12,25 +12,34 @@ import {
 import arrowBack from '../../assets/arrow_back.png';
 
 const CashDeposit = ({navigation}) => {
-  const [rekening, setRekening] = useState('');
   const [bank, setBank] = useState('');
-  const [jumlah, setJumlah] = useState('');
-  const [saldo, setSaldo] = useState(10000000); // Saldo awal Rp10.000.000
-  const [transaksi, setTransaksi] = useState([
-    {tanggal: '17 April 2020', deskripsi: 'Pemasukan', nominal: 300000},
-    {tanggal: '18 April 2020', deskripsi: 'Pengeluaran', nominal: -300000},
+  const [targetBank, setTargetBank] = useState('');
+  const [amount, setAmount] = useState('');
+  const [balance, setBalance] = useState(10000000);
+  const [transactions, setTransactions] = useState([
+    {tanggal: '17 April 2020', deskripsi: 'Income', nominal: 300000},
+    {tanggal: '18 April 2020', deskripsi: 'Expense', nominal: -300000},
     {tanggal: '19 April 2020', deskripsi: 'Top Up', nominal: 300000},
   ]);
 
   const handleDeposit = () => {
-    if (!rekening || !bank || !jumlah) {
-      Alert.alert('Failed', 'All fields must be filled!');
+    if (!bank.trim() || !targetBank.trim() || !amount.trim()) {
+      Alert.alert('Failed', 'Please enter all fields.');
       return;
     }
 
-    const nominalAngka = parseInt(jumlah.replace(/[^0-9]/g, ''), 10);
-    if (isNaN(nominalAngka) || nominalAngka <= 0) {
-      Alert.alert('Failed', 'Invalid amount!');
+    const nominal = parseInt(amount.replace(/[^0-9]/g, ''), 10);
+    if (isNaN(nominal) || nominal <= 0) {
+      Alert.alert('Failed', 'Invalid deposit amount.');
+      return;
+    }
+
+    const isSameBank = bank.toLowerCase() === targetBank.toLowerCase();
+    const adminFee = isSameBank ? 0 : 6500;
+    const totalDeposit = nominal - adminFee;
+
+    if (totalDeposit <= 0) {
+      Alert.alert('Failed', 'Amount too low after admin fee.');
       return;
     }
 
@@ -41,63 +50,74 @@ const CashDeposit = ({navigation}) => {
       year: 'numeric',
     });
 
-    const transaksiBaru = {
+    const newTransaction = {
       tanggal,
-      deskripsi: 'Cash Deposit',
-      nominal: nominalAngka,
+      deskripsi: `Cash Deposit to ${targetBank}`,
+      nominal: totalDeposit,
     };
 
-    setTransaksi(prev => [transaksiBaru, ...prev]);
-    setSaldo(prev => prev + nominalAngka); // Tambah saldo
-    setRekening('');
+    setTransactions(prev => [newTransaction, ...prev]);
+    setBalance(prev => prev + totalDeposit);
     setBank('');
-    setJumlah('');
-    Alert.alert('Success', 'Cash deposit successful');
+    setTargetBank('');
+    setAmount('');
+
+    Alert.alert(
+      'Success',
+      `Deposit successful.\nAdmin Fee: Rp${adminFee.toLocaleString('id-ID')}`,
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            navigation.navigate('Home', {
+              type: 'deposit',
+              nominal: totalDeposit,
+              adminFee: adminFee,
+            });
+          },
+        },
+      ],
+    );
   };
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image source={arrowBack} style={styles.arrowIcon} />
         </TouchableOpacity>
-        <Text style={styles.headerText}>CashDeposit</Text>
+        <Text style={styles.headerText}>Cash Deposit</Text>
       </View>
 
-      {/* Saldo */}
       <View style={styles.card}>
         <Text style={styles.label}>Funds</Text>
         <Text style={styles.bold}>NM</Text>
         <Text>200213443U3I</Text>
-        <Text style={styles.bold}>Rp{saldo.toLocaleString('id-ID')}</Text>
+        <Text style={styles.bold}>Rp{balance.toLocaleString('id-ID')}</Text>
       </View>
 
-      {/* Input Rekening */}
       <View style={styles.inputGroup}>
-        <Text style={styles.label}>Destination Account</Text>
+        <Text style={styles.label}>Your Bank Name</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter The Destination Account"
-          placeholderTextColor="#888"
-          value={rekening}
-          onChangeText={setRekening}
-        />
-      </View>
-
-      {/* Input Bank */}
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Bank Name</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter The Bank Name"
+          placeholder="Enter your bank"
           placeholderTextColor="#888"
           value={bank}
           onChangeText={setBank}
         />
       </View>
 
-      {/* Input Jumlah */}
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Target Bank Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter destination bank"
+          placeholderTextColor="#888"
+          value={targetBank}
+          onChangeText={setTargetBank}
+        />
+      </View>
+
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Amount</Text>
         <TextInput
@@ -105,20 +125,18 @@ const CashDeposit = ({navigation}) => {
           placeholder="Rp"
           keyboardType="numeric"
           placeholderTextColor="#888"
-          value={jumlah}
-          onChangeText={setJumlah}
+          value={amount}
+          onChangeText={setAmount}
         />
       </View>
 
-      {/* Tombol Deposit */}
       <TouchableOpacity style={styles.button} onPress={handleDeposit}>
-        <Text style={styles.buttonText}>CashDeposit</Text>
+        <Text style={styles.buttonText}>Cash Deposit</Text>
       </TouchableOpacity>
 
-      {/* Riwayat Transaksi */}
       <View style={styles.historyContainer}>
         <Text style={styles.label}>Last Transactions</Text>
-        {transaksi.slice(0, 3).map((item, index) => (
+        {transactions.slice(0, 3).map((item, index) => (
           <View key={index} style={styles.historyItem}>
             <View>
               <Text style={styles.historyDate}>{item.tanggal}</Text>
@@ -180,7 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#1E90FF',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',

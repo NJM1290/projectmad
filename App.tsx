@@ -9,7 +9,7 @@ import SignUp from './src/pages/SignUp';
 import Home from './src/pages/Home';
 import Cashwithdrawal from './src/pages/CashWithdrawel';
 import CashDeposit from './src/pages/CashDeposit';
-
+import './src/config/Firebase';
 // ✅ Buat AuthContext
 export const AuthContext = createContext();
 

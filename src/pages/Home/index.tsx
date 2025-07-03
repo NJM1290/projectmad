@@ -2,11 +2,39 @@ import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
 import {Button, Gap} from '../../components/atoms';
 import {DummyPhoto} from '../../assets';
+import {getDatabase, ref, child, get} from 'firebase/database';
+import {Loading} from '../../components/molecules';
 
 const Home = ({navigation, route}) => {
   const [balance, setBalance] = useState(10000000);
   const [income, setIncome] = useState(6000000);
   const [expenditure, setExpenditure] = useState(4000000);
+  const [photo, setPhoto] = useState(DummyPhoto);
+  const [fullName, setFullName] = useState('John Doe');
+  const [loading, setLoading] = useState(false);
+
+  const {uid} = route.params;
+
+  useEffect(() => {
+    // ambil data user dari Firebase
+    setLoading(true);
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, `users/${uid}`))
+      .then(snapshot => {
+        setLoading(false);
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          setPhoto({uri: data.photo});
+          setFullName(data.fullName);
+        } else {
+          console.log('No data available');
+        }
+      })
+      .catch(error => {
+        setLoading(false);
+        console.error(error);
+      });
+  }, []);
 
   useEffect(() => {
     if (route.params?.type === 'deposit') {
@@ -20,16 +48,20 @@ const Home = ({navigation, route}) => {
     }
   }, [route.params]);
 
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <View style={styles.pageContainer}>
       <View style={styles.headerContainer}>
         <View>
-          <Text style={styles.appTitle}>{`Hi, John Doe`}</Text>
+          <Text style={styles.appTitle}>{`Hi, ${fullName}`}</Text>
           <Text style={styles.appSubTitle}>
-            Have you track your money today?
+            This is your personal finance app
           </Text>
         </View>
-        <Image source={DummyPhoto} style={styles.photo} />
+        <Image source={photo} style={styles.photo} />
       </View>
 
       <View style={styles.contentWrapper}>

@@ -54,13 +54,20 @@ const CashWithdrawal = ({navigation}) => {
     setTransactions(prev => [newTransaction, ...prev]);
     setBalance(prev => prev - nominal);
     setBank('');
-    setAmount('');
+    // setAmount(''); // jangan dihapus kalau nominal mau tetap terlihat
 
-    // Navigasi kembali ke Home dengan data penarikan
-    navigation.navigate('Home', {
-      type: 'withdrawal',
-      nominal: nominal,
-    });
+    // Tampilkan alert sukses, baru navigasi jika user tekan OK
+    Alert.alert('Success', 'Cash withdrawal successful.', [
+      {
+        text: 'OK',
+        onPress: () => {
+          navigation.navigate('Home', {
+            type: 'withdrawal',
+            nominal: nominal,
+          });
+        },
+      },
+    ]);
   };
 
   return (
